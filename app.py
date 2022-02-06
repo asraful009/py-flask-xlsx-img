@@ -43,12 +43,10 @@ def files():
         "payload": None
       })
       return Response( errMsg, status=401, mimetype='application/json')
-
-    # token = request.form.get('token')
     file = request.files['xlsx']
     print(token)
-    XlsImport(xlsx = file, token=token)
-    # file.save(f"/var/www/uploads/{secure_filename(file.filename)}")
+    xls = XlsImport(xlsx = file, token=token)
+    xls.start()
   return {"f": "asd"}
 
 if __name__ == "__main__":

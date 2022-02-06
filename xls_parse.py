@@ -2,6 +2,7 @@ from itertools import product
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl_image_loader import SheetImageLoader
+import threading
 import io
 import requests
 from PIL import Image
@@ -101,11 +102,14 @@ class Product:
   def __str__(self):
     return f"{self.name}, {self.price}, {self.qty}"
 
-class XlsImport:
+class XlsImport(threading.Thread):
+  products = []
+
   def __init__(self, xlsx, token):
+    threading.Thread.__init__(self)
     wb = load_workbook(xlsx)
     ws = wb["product"]
-    products = []
+
     image_loader = SheetImageLoader(ws)
     isFirst = True
     for row in ws.iter_rows():
@@ -131,10 +135,14 @@ class XlsImport:
             product.price = float(f"{cell.value}")
           elif cell.column_letter =="D" :
             product.qty = float(f"{cell.value}")
-      products.append(product)
-    l = len(products)
+      self.products.append(product)
+    l = len(self.products)
+    print(l)
+    
+  def run(self):
+    l = len(self.products)
     print(l)
     for i in range(l):
-      pro = products[i]
+      pro = self.products[i]
       pro.sendImage()
       print(pro)
