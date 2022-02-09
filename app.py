@@ -1,5 +1,7 @@
+from encodings import utf_8
 from flask import Flask, render_template, request, Response
 import os
+import redis
 import json 
 from dotenv import dotenv_values
 from xls_parse import XlsImport, current_milli_time
@@ -7,6 +9,9 @@ from xls_parse import XlsImport, current_milli_time
 env = f'.{ os.environ["NODE_ENV"] }' if len(os.environ["NODE_ENV"]) else ""
 config = dotenv_values(f"env/.env{ env }")
 app = Flask(__name__)
+print(config['REDIS_SESSION'])
+r = redis.Redis.from_url(url=f'{config["REDIS_SESSION"]}')
+print(r)
 
 @app.route("/")
 def index():
@@ -43,6 +48,8 @@ def files():
         "payload": None
       })
       return Response( errMsg, status=401, mimetype='application/json')
+    userInfo = json.loads(r.get(f'{token}'))
+    print(userInfo)
     file = request.files['xlsx']
     # print(token)
     xls = XlsImport(xlsx = file, token=token)
