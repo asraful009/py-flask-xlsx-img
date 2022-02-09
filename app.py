@@ -52,7 +52,7 @@ def files():
     print(userInfo)
     file = request.files['xlsx']
     # print(token)
-    xls = XlsImport(xlsx = file, token=token)
+    xls = XlsImport(xlsx = file, token=token, userInfo=userInfo)
     xls.start()
   return {"f": "asd"}
 

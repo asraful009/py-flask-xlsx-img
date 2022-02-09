@@ -67,7 +67,7 @@ class Product:
 class XlsImport(threading.Thread):
   products = []
 
-  def __init__(self, xlsx, token):
+  def __init__(self, xlsx, token, userInfo):
     threading.Thread.__init__(self)
     wb = load_workbook(xlsx)
     ws = wb["products"]
@@ -98,6 +98,7 @@ class XlsImport(threading.Thread):
           else:
             product.product[header[cell.column_letter]] = cell.value
         # print(product)
+        product.product["userID"] = userInfo["userId"]
         self.products.append(product)
     except Exception as e:
       print(e)
@@ -125,6 +126,7 @@ class XlsImport(threading.Thread):
       image["cover"] = prod.imageTempUpload(prod.cover, "cover")
       image["gallery"] = [prod.imageTempUpload(prod.gallery, "gallery")]
       prod.product["image"] = image
+
       print(prod)
       self.productUpload(prod)
     # l = len(self.products)
