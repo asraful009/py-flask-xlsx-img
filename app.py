@@ -17,17 +17,17 @@ def files():
   if request.method == 'POST':
     token = ""
     try :
-      print(request.headers)
+      # print(request.headers)
       if "Authorization" not in request.headers:
         raise Exception("Token is not found in request header")
       authorization = request.headers['Authorization']
       bears = authorization.split(" ")
-      print(bears)
+      # print(bears)
       if len(bears) < 1 :
         raise Exception("Token is not found in request header")
       token = bears[1]
     except Exception as err:
-      print(err)
+      # print(err)
       errMsg = json.dumps({
         "nonce": current_milli_time(),
         "status": 401,
@@ -44,7 +44,7 @@ def files():
       })
       return Response( errMsg, status=401, mimetype='application/json')
     file = request.files['xlsx']
-    print(token)
+    # print(token)
     xls = XlsImport(xlsx = file, token=token)
     xls.start()
   return {"f": "asd"}
