@@ -31,7 +31,7 @@ class Product:
   cover = None
   gallery = None
 
-  def imageTempUpload(self, image, imgType):
+  def coverImageTempUpload(self, image, imgType):
     ret = ""
     with requests.Session() as s:
       img = io.BytesIO()
@@ -49,19 +49,37 @@ class Product:
       r = s.request("POST", url, headers=headers, data=payload, files=files)
       # self.cover.save(f"{self.name}-{current_milli_time()}.{self.cover.format}", f"{self.cover.format}")
       payload = r.text
-      headers["Content-Type"] = "application/json"
-      url = "http://localhost:3105/api/image-upload/product"
-      r = requests.request("POST", url, headers=headers, data=payload)
-      print()
+      ret = json.loads(r.text)["filename"]
+    return ret
+
+  def galleryImageTempUpload(self, image, imgType):
+    ret = ""
+    with requests.Session() as s:
+      img = io.BytesIO()
+      headers = {
+        "Authorization": f"Bearer {self.token}",
+        "Connection": "close"
+      }
+      payload={}
+      url = 'http://localhost:3105/api/image-upload/product-redis/gallery'
+      print(image)
+      image.save(img, format=f"{image.format}")
+      files=[
+        ('image',(f"{imgType}-{current_milli_time()}.{image.format}", img.getvalue(), Image.MIME[image.format]))
+      ]
+      r = s.request("POST", url, headers=headers, data=payload, files=files)
+      # self.cover.save(f"{self.name}-{current_milli_time()}.{self.cover.format}", f"{self.cover.format}")
+      payload = r.text
       ret = json.loads(r.text)["filename"]
     return ret
 
   def __str__(self):
-    ret = ""
+    ret = "{"
     for key in self.product:
-      ret += f"{key} -> {self.product[key]}\n"
-    ret += f"coverImg -> {self.cover}\n"
-    ret += f"galleryImg -> {self.gallery}\n"
+      ret += f'"{key}" : "{self.product[key]}",\n'
+    # ret += f"coverImg -> {self.cover}\n"
+    # ret += f"galleryImg -> {self.gallery}\n"
+    ret +="}"
     return ret
 
 class XlsImport(threading.Thread):
@@ -98,7 +116,7 @@ class XlsImport(threading.Thread):
           else:
             product.product[header[cell.column_letter]] = cell.value
         # print(product)
-        product.product["userID"] = userInfo["userId"]
+        # product.product["userID"] = userInfo["userId"]
         self.products.append(product)
     except Exception as e:
       print(e)
@@ -114,7 +132,7 @@ class XlsImport(threading.Thread):
       }
       payload=json.dumps(product.product)
       headers["Content-Type"] = "application/json"
-      url = "http://localhost:3103/api/products"
+      url = "http://localhost:3103/api/admin/products"
       r = requests.request("POST", url, headers=headers, data=payload)
       print(r.text)
       ret = json.loads(r.text)
@@ -123,8 +141,8 @@ class XlsImport(threading.Thread):
   def run(self):
     for prod in self.products:
       image = {}
-      image["cover"] = prod.imageTempUpload(prod.cover, "cover")
-      image["gallery"] = [prod.imageTempUpload(prod.gallery, "gallery")]
+      image["cover"] = prod.coverImageTempUpload(prod.cover, "cover")
+      image["gallery"] = [prod.galleryImageTempUpload(prod.gallery, "gallery")]
       prod.product["image"] = image
 
       print(prod)

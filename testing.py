@@ -1,5 +1,19 @@
 import requests
+import json
+url = "http://localhost:3102/api/auth/login"
 
+payload={
+  "phone": "01957206205",
+  "email": "string",
+  "password": "s1234",
+  "isChecked": 0
+}
+headers = {"Content-Type": "application/json"}
+response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
+res = json.loads(response.text)
+# print(res)
+token = res["payload"]["data"]["accessToken"]
+# print(token)
 url = "http://localhost:3112/file"
 
 payload={}
@@ -7,7 +21,7 @@ files=[
   ('xlsx',('a.xlsx',open('./products.xlsx','rb'),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))
 ]
 headers = {
-  'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6IjAxOTU3MjA2MjA1IiwidXNlck5hbWUiOiJFYm9uZWFyIFN1cGVyIEFkbWluIiwicm9sZXMiOlt7InJvbGUiOiJTVVBFUl9BRE1JTl9ST0xFIn1dLCJpc1N1cGVyQWRtaW4iOnRydWUsImlzQWRtaW4iOmZhbHNlLCJpc0VtcGxveWVlIjpmYWxzZSwiaXNDdXN0b21lciI6ZmFsc2UsImlzTWVyY2hhbnQiOmZhbHNlLCJpc1VzZXIiOmZhbHNlLCJpc0FmZmlsaWF0b3IiOmZhbHNlLCJpc1RyYW5zcG9ydGVyIjpmYWxzZSwiaXNTaG9wTWFuYWdlciI6ZmFsc2UsInVzZXJJZCI6ImNhNmE5MGUwLTNhNTMtNDNhZS1iMjYyLWEwNjdkMzMxYjljZCIsIlN1cGVyQWRtaW5JZCI6ImNhNmE5MGUwLTNhNTMtNDNhZS1iMjYyLWEwNjdkMzMxYjljZCIsIkFkbWluSWQiOiJjYTZhOTBlMC0zYTUzLTQzYWUtYjI2Mi1hMDY3ZDMzMWI5Y2QiLCJFbXBsb3llZUlkIjpudWxsLCJDdXN0b21lcklkIjpudWxsLCJNZXJjaGFudElkIjpudWxsLCJBZmZpbGlhdG9ySWQiOm51bGwsIlRyYW5zcG9ydGVySWQiOm51bGwsIlNob3BNYW5hZ2VySWQiOm51bGwsImhhc0xpY2Vuc2VBbmROSUQiOmZhbHNlLCJpYXQiOjE2NDQ0MDMyNzYsImV4cCI6MTY3NTkzOTI3Nn0.EYwvVho7kEg2bgUmyG5dvC0vhvElcOFDjOIEAQPdDicBDZ35HSW2CH9JZz2O9EWJNVtYWM9MMyAoHrPMfm97sw'
+  'Authorization': f'Bearer {token}'
 }
 
 response = requests.request("POST", url, headers=headers, data=payload, files=files)
