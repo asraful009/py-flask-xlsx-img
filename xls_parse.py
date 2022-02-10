@@ -44,11 +44,14 @@ class Product:
       print(image)
       image.save(img, format=f"{image.format}")
       files=[
-        ('image',(f"{imgType}-{current_milli_time()}.{image.format}", img.getvalue(), Image.MIME[image.format]))
+        ('image',(f"{imgType}-{current_milli_time()}.jpg", img.getvalue(), Image.MIME[image.format]))
       ]
       r = s.request("POST", url, headers=headers, data=payload, files=files)
       # self.cover.save(f"{self.name}-{current_milli_time()}.{self.cover.format}", f"{self.cover.format}")
       payload = r.text
+      headers["Content-Type"] = "application/json"
+      url = "http://localhost:3105/api/image-upload/product"
+      r = requests.request("POST", url, headers=headers, data=payload)
       ret = json.loads(r.text)["filename"]
     return ret
 
@@ -65,11 +68,14 @@ class Product:
       print(image)
       image.save(img, format=f"{image.format}")
       files=[
-        ('image',(f"{imgType}-{current_milli_time()}.{image.format}", img.getvalue(), Image.MIME[image.format]))
+        ('image',(f"{imgType}-{current_milli_time()}.jpg", img.getvalue(), Image.MIME[image.format]))
       ]
       r = s.request("POST", url, headers=headers, data=payload, files=files)
       # self.cover.save(f"{self.name}-{current_milli_time()}.{self.cover.format}", f"{self.cover.format}")
       payload = r.text
+      headers["Content-Type"] = "application/json"
+      url = "http://localhost:3105/api/image-upload/product"
+      r = requests.request("POST", url, headers=headers, data=payload)
       ret = json.loads(r.text)["filename"]
     return ret
 
@@ -87,6 +93,7 @@ class XlsImport(threading.Thread):
 
   def __init__(self, xlsx, token, userInfo):
     threading.Thread.__init__(self)
+    self.products = []
     wb = load_workbook(xlsx)
     ws = wb["products"]
     image_loader = SheetImageLoader(ws)
@@ -116,7 +123,7 @@ class XlsImport(threading.Thread):
           else:
             product.product[header[cell.column_letter]] = cell.value
         # print(product)
-        # product.product["userID"] = userInfo["userId"]
+        product.product["userID"] = userInfo["userId"]
         self.products.append(product)
     except Exception as e:
       print(e)
